@@ -1,0 +1,43 @@
+.login-intro {
+  background-color: #030303;
+  background-image: linear-gradient(90deg, rgba(0,0,0,.99) 0%, rgba(0,0,0,.92) 48%, rgba(0,0,0,.58) 100%), url('./assets/solo-carnes-fire-bg.png');
+  background-position: 33% 50%;
+  background-size: cover;
+  isolation: isolate;
+}
+.login-intro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,.55), transparent 45%);
+  z-index: -1;
+}
+.login-intro::after { display: none; }
+.login-intro > div { position: relative; z-index: 1; }
+.login-intro h1 { color: #fff; text-shadow: 0 3px 18px #000, 0 0 3px #fff; }
+.login-intro p, .login-intro address { text-shadow: 0 2px 10px #000, 0 0 2px #000; }
+.login-intro .eyebrow { color: #ff756e; text-shadow: 0 2px 8px #000; }
+@media (max-width: 680px) {
+  .login-intro { background-position: 38% 50%; }
+}
+.real-scene { margin-top: -8px; height: 278px; border-radius: 12px; overflow: hidden; background: #160606; }
+.real-scene iframe { width: 100%; height: 100%; border: 0; display: block; }
+.real-scene .scene-label { background: rgba(0,0,0,.72); padding: .38rem .55rem; border-radius: 6px; }
+.real-plate { margin-top: -8px; height: 278px; overflow: visible; }
+.real-plate img { width: 122%; height: 122%; object-fit: contain; object-position: center; filter: drop-shadow(0 24px 18px rgba(0,0,0,.48)); transform: rotate(-5deg) translate(-6%, -7%); transition: transform .35s ease; }
+.real-plate:hover img { transform: rotate(-2deg) translate(-6%, -9%) scale(1.04); }
+.real-plate .scene-label { background: rgba(0,0,0,.72); padding: .38rem .55rem; border-radius: 6px; }
+
+.module-form select { width:100%; appearance:none; background:#090909; border:1px solid #463b38; border-radius:7px; color:#fff; padding:.95rem; outline-color:var(--red); }
+.module-form select:disabled, .module-form input:disabled { opacity:.58; cursor:not-allowed; }
+.form-action { display:flex; align-items:end; }
+.module-notice, .module-success, .module-error { border-radius:8px; padding:.82rem 1rem; font-size:.82rem; font-weight:700; }
+.module-notice { color:#ffd99b; background:#302313; border:1px solid #70501f; }
+.module-success { color:#a9e6b4; background:#15351d; border:1px solid #2e7240; }
+.module-error { color:#ffaaa5; background:#3a1717; border:1px solid #843530; }
+.table-empty { color:var(--muted); margin:1rem 0 .1rem; }
+.product-table { margin-top:1rem; overflow-x:auto; }
+.product-row { min-width:630px; display:grid; grid-template-columns: .8fr 1.7fr .9fr 1fr .9fr; gap:.75rem; align-items:center; padding:.82rem .45rem; border-bottom:1px solid #2e2725; color:#ddd5d1; font-size:.8rem; }
+.product-row:last-child { border-bottom:0; }
+.product-label { color:#a99e9a; padding-top:0; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; }
+.product-type { width:max-content; border:1px solid #a8322e; border-radius:99px; color:#ff9c95; padding:.22rem .45rem; font-size:.65rem; font-weight:800; }
