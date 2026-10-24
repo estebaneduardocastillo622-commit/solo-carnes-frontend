@@ -63,3 +63,9 @@
 .sales-form input,.sales-form select { background:#261b19; border-color:#8d5c52; color:#fff; }
 .sales-form input::placeholder { color:#d3a69c; }.sales-form .product-search { grid-column:span 2; }.sales-form .product-search small { color:#ffb7a8; font-weight:700; }
 @media(max-width:680px){.table-scene{height:310px}.hero{padding:1rem}.table-legend{display:none}.sales-form .product-search{grid-column:auto}}
+.table-scene { background:linear-gradient(145deg,#5f2118,#cc4a22 45%,#2b110e); box-shadow:inset 0 0 70px #ff64252c,0 16px 32px #0007; }
+.floor-logo { position:absolute; z-index:2; width:86px; height:86px; object-fit:cover; border-radius:50%; top:12px; right:14px; border:2px solid #f3bc5e; box-shadow:0 0 0 4px #2a0808b8,0 0 22px #ffb4419c; pointer-events:none; }
+.table-info { border-color:#ffc364; background:linear-gradient(145deg,#2d0d0b,#130706e8); box-shadow:0 8px 24px #000b,0 0 16px #ff552b38; }
+.table-info strong { color:#fff1c4; font-size:.9rem; }.table-info button{background:linear-gradient(90deg,#e62920,#ff592c);border-color:#ffc15b;}
+.table-legend { border:1px solid #ffbd6b66; background:#200a08e8; }.table-scene .scene-label{border:1px solid #ffbd6b55;color:#ffe0a1;}
+@media(max-width:680px){.floor-logo{width:58px;height:58px;top:8px;right:8px}}
