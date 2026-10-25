@@ -132,6 +132,9 @@
 .form-context { grid-column:1 / -1; display:flex; align-items:baseline; justify-content:space-between; gap:1rem; padding:0 0 .9rem; border-bottom:1px solid #3d2d29; }
 .form-context strong { color:#fff1d9; font-size:.92rem; }
 .form-context small { max-width:560px; color:#d1aaa0; line-height:1.45; font-size:.7rem; }
-.product-row.user-row { min-width:600px; grid-template-columns:1.5fr 1.2fr .8fr 1fr; }
+.product-row.user-row { min-width:720px; grid-template-columns:1.5fr 1.2fr .8fr 1fr max-content; }
 .user-current { color:#d8c5bf; font-size:.76rem; }
-@media(max-width:680px){.user-form{grid-template-columns:1fr}.form-context{display:grid;gap:.35rem}.product-row.user-row{min-width:520px}}
+.user-protected { color:#a99e9a; font-size:.7rem; font-weight:800; padding:.45rem .2rem; }
+.danger-action { border-color:#ae423c; color:#ffaaa3; }
+.danger-action:hover { background:#3a1717; }
+@media(max-width:680px){.user-form{grid-template-columns:1fr}.form-context{display:grid;gap:.35rem}.product-row.user-row{min-width:640px}}

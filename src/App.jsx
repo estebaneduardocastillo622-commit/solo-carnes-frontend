@@ -3,7 +3,7 @@ import { ContactShadows, OrbitControls, Text } from '@react-three/drei';
 import { useEffect, useRef, useState } from 'react';
 import { Bell, ChefHat, ClipboardList, Flame, LayoutDashboard, LogOut, Minus, Package, Plus, ShoppingBasket, Trash2, UsersRound, UtensilsCrossed } from 'lucide-react';
 import logo from './assets/solo-carnes-logo.jpg';
-import { createConsumption, createProduct, createPurchase, createRecipe, createUser, deleteProduct, createSale, deleteRecipe, getMovements, getProducts, getPurchases, getRecipes, getSales, getUsers, login } from './api';
+import { createConsumption, createProduct, createPurchase, createRecipe, createUser, deleteProduct, deleteUser, createSale, deleteRecipe, getMovements, getProducts, getPurchases, getRecipes, getSales, getUsers, login } from './api';
 import './App.css';
 import './overrides.css';
 
@@ -135,7 +135,7 @@ function RecipeModule({session}) {
 }
 function UsersModule({session}) {
   const empty = { nombre_completo:'', email:'', password:'', rol:'vendedor' };
-  const [form,setForm] = useState(empty), [users,setUsers] = useState([]), [loading,setLoading] = useState(true), [saving,setSaving] = useState(false), [notice,setNotice] = useState(''), [error,setError] = useState('');
+  const [form,setForm] = useState(empty), [users,setUsers] = useState([]), [loading,setLoading] = useState(true), [saving,setSaving] = useState(false), [deletingId,setDeletingId] = useState(null), [notice,setNotice] = useState(''), [error,setError] = useState('');
   const canManage = session.usuario.rol === 'administrador';
   const roleName = role => ({ administrador:'Administrador', vendedor:'Cajero / vendedor', almacen:'Encargado de almacén' }[role] || role);
   async function load(showConfirmation=false) {
@@ -157,6 +157,13 @@ function UsersModule({session}) {
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   }
+  async function remove(user) {
+    if (!window.confirm('¿Eliminar definitivamente la cuenta de ' + user.nombre_completo + '? Esta acción borra su acceso al sistema.')) return;
+    setDeletingId(user.usuario_id); setNotice(''); setError('');
+    try { await deleteUser(session.access_token, user.usuario_id); setNotice('Usuario eliminado correctamente.'); await load(); }
+    catch (err) { setError(err.message); }
+    finally { setDeletingId(null); }
+  }
   return <section className="module users-module">
     <div className="module-head"><div><p className="eyebrow">ACCESOS DEL PERSONAL</p><h2>Usuarios y roles</h2><p>Crea las cuentas del equipo y define qué puede hacer cada persona.</p></div><button type="button" className="outline" onClick={() => load(true)} disabled={loading}>{loading?'Actualizando…':'Actualizar personal'}</button></div>
     {session.demo && <div className="module-notice">Inicia sesión como administrador para crear cuentas reales.</div>}
@@ -170,7 +177,7 @@ function UsersModule({session}) {
     </form>}
     {!session.demo && !canManage && <div className="module-notice">Solo un administrador puede crear y consultar usuarios.</div>}
     {notice && <div className="module-success">{notice}</div>}{error && <div className="module-error">{error}</div>}
-    {canManage && <div className="table-card"><div className="table-title"><h3>Personal registrado</h3><span>{loading?'Cargando…':users.length+' usuario'+(users.length===1?'':'s')}</span></div>{loading?<p className="table-empty">Cargando personal…</p>:users.length?<div className="product-table"><div className="product-row user-row product-label"><strong>Nombre</strong><strong>Rol</strong><strong>Estado</strong><strong>Acceso</strong></div>{users.map(user=><div className="product-row user-row" key={user.usuario_id}><strong>{user.nombre_completo}</strong><span className="product-type">{roleName(user.rol)}</span><span><b className={user.estado?'stock-status stock-status-ok':'stock-status stock-status-low'}>{user.estado?'Activo':'Inactivo'}</b></span><span className="user-current">{user.usuario_id===session.usuario.usuario_id?'Tu cuenta':'Cuenta de personal'}</span></div>)}</div>:<p className="table-empty">Todavía no hay usuarios registrados.</p>}</div>}
+    {canManage && <div className="table-card"><div className="table-title"><h3>Personal registrado</h3><span>{loading?'Cargando…':users.length+' usuario'+(users.length===1?'':'s')}</span></div>{loading?<p className="table-empty">Cargando personal…</p>:users.length?<div className="product-table"><div className="product-row user-row product-label"><strong>Nombre</strong><strong>Rol</strong><strong>Estado</strong><strong>Acceso</strong><strong>Acción</strong></div>{users.map(user=>{ const isCurrent = user.usuario_id===session.usuario.usuario_id; return <div className="product-row user-row" key={user.usuario_id}><strong>{user.nombre_completo}</strong><span className="product-type">{roleName(user.rol)}</span><span><b className={user.estado?'stock-status stock-status-ok':'stock-status stock-status-low'}>{user.estado?'Activo':'Inactivo'}</b></span><span className="user-current">{isCurrent?'Tu cuenta':'Cuenta de personal'}</span>{isCurrent?<span className="user-protected">Protegida</span>:<button type="button" className="outline row-action danger-action" onClick={()=>remove(user)} disabled={deletingId===user.usuario_id}>{deletingId===user.usuario_id?'Eliminando…':'Eliminar'}</button>}</div>})}</div>:<p className="table-empty">Todavía no hay usuarios registrados.</p>}</div>}
   </section>
 }
 function KitchenKardex({session}) {
