@@ -31,3 +31,5 @@ export const createRecipe = (token, recipe) => request('/api/recetas', token, { 
 export const deleteRecipe = (token, id) => request(`/api/recetas/${id}`, token, { method: 'DELETE' });
 
 
+
+export const deleteProduct = (token, id) => request(/api/productos/${id}, token, { method: 'DELETE' });
