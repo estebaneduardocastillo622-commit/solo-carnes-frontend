@@ -32,4 +32,4 @@ export const deleteRecipe = (token, id) => request(`/api/recetas/${id}`, token, 
 
 
 
-export const deleteProduct = (token, id) => request(/api/productos/${id}, token, { method: 'DELETE' });
+export const deleteProduct = (token, id) => request('/api/productos/' + id, token, { method: 'DELETE' });
