@@ -23,6 +23,9 @@ function ProductModule({session}) {
   const empty = {codigo:'', nombre:'', tipo:'INSUMO', unidad:'KG', precio_venta:'', stock_minimo:''};
   const [form, setForm] = useState(empty), [products, setProducts] = useState([]), [loading, setLoading] = useState(true), [saving, setSaving] = useState(false), [deletingId, setDeletingId] = useState(null), [notice, setNotice] = useState(''), [error, setError] = useState('');
   const canManage = ['administrador','almacen'].includes(session.usuario.rol);
+  const stockOf = product => Number(product.stock ?? product.stock_actual ?? 0);
+  const isLowStock = product => product.tipo !== 'PLATO' && stockOf(product) <= Number(product.stock_minimo ?? 0);
+  const lowStockItems = products.filter(isLowStock);
   async function load(showConfirmation=false) {
     if (session.demo) { setProducts([]); setLoading(false); if (showConfirmation) setNotice('La demostración no consulta datos reales.'); return; }
     setLoading(true); setError('');
@@ -58,8 +61,11 @@ function ProductModule({session}) {
       <div className="form-action"><button className="primary" disabled={saving}>{saving ? 'Guardando…' : 'Registrar producto'}</button></div>
     </form>}
     {notice && <div className="module-success">{notice}</div>}{error && <div className="module-error">{error}</div>}
+    {!loading && products.length > 0 && <div className={lowStockItems.length ? 'stock-alert stock-alert-low' : 'stock-alert stock-alert-ok'}>
+      <span>{lowStockItems.length ? '⚠' : '✓'}</span><div><strong>{lowStockItems.length ? `${lowStockItems.length} producto${lowStockItems.length === 1 ? '' : 's'} con stock bajo` : 'Inventario con existencias disponibles'}</strong><small>{lowStockItems.length ? lowStockItems.map(item => item.nombre).join(' · ') : 'Las bebidas e insumos están por encima de su stock mínimo.'}</small></div>
+    </div>}
     <div className="table-card"><div className="table-title"><h3>Productos registrados</h3><span>{loading ? 'Cargando…' : products.length + ' mostrados'}</span></div>
-      {loading ? <p className="table-empty">Cargando inventario…</p> : products.length===0 ? <p className="table-empty">{session.demo ? 'Inicia sesión para ver el inventario real.' : 'No hay productos registrados todavía.'}</p> : <div className="product-table"><div className="product-row product-label"><strong>Código</strong><strong>Producto</strong><strong>Tipo</strong><strong>Stock</strong><strong>Precio</strong><strong>Acción</strong></div>{products.map(p => <div className="product-row" key={p.producto_id}><span>{p.codigo}</span><strong>{p.nombre}</strong><span className="product-type">{p.tipo}</span><span>{p.stock ?? p.stock_actual ?? 0} {p.unidad}</span><span>Bs {Number(p.precio_venta).toFixed(2)}</span>{canManage && <button type="button" className="outline row-action" onClick={() => remove(p)} disabled={deletingId===p.producto_id}>{deletingId===p.producto_id ? 'Eliminando…' : 'Eliminar'}</button>}</div>)}</div>}
+      {loading ? <p className="table-empty">Cargando inventario…</p> : products.length===0 ? <p className="table-empty">{session.demo ? 'Inicia sesión para ver el inventario real.' : 'No hay productos registrados todavía.'}</p> : <div className="product-table"><div className="product-row product-label inventory-row"><strong>Código</strong><strong>Producto</strong><strong>Tipo</strong><strong>Stock</strong><strong>Mínimo</strong><strong>Estado</strong><strong>Acción</strong></div>{products.map(p => { const low = isLowStock(p); const isPlate = p.tipo === 'PLATO'; return <div className={'product-row inventory-row ' + (low ? 'inventory-low' : '')} key={p.producto_id}><span>{p.codigo}</span><strong>{p.nombre}</strong><span className="product-type">{p.tipo}</span><span className={low ? 'stock-value stock-value-low' : 'stock-value'}>{isPlate ? 'Por receta' : `${stockOf(p)} ${p.unidad}`}</span><span>{isPlate ? '—' : `${p.stock_minimo ?? 0} ${p.unidad}`}</span><span><b className={isPlate ? 'stock-status stock-status-recipe' : low ? 'stock-status stock-status-low' : 'stock-status stock-status-ok'}>{isPlate ? 'Por receta' : low ? 'Stock bajo' : 'Disponible'}</b></span>{canManage && <button type="button" className="outline row-action" onClick={() => remove(p)} disabled={deletingId===p.producto_id}>{deletingId===p.producto_id ? 'Eliminando…' : 'Eliminar'}</button>}</div>})}</div>}
     </div>
   </section>
 }

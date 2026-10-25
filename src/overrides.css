@@ -74,6 +74,25 @@
 
 /* Acciones operativas: cada fila mantiene sus botones dentro de la tabla. */
 .product-row { grid-template-columns: .85fr 1.7fr .9fr .95fr .85fr max-content; }
+.product-row.inventory-row { min-width:870px; grid-template-columns: .8fr 1.55fr .82fr .95fr .85fr .95fr max-content; }
+.stock-alert { display:flex; align-items:flex-start; gap:.72rem; margin:0 0 1rem; padding:.85rem 1rem; border:1px solid; border-radius:10px; }
+.stock-alert > span { display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; border-radius:50%; font-weight:950; }
+.stock-alert strong,.stock-alert small { display:block; }
+.stock-alert strong { font-size:.82rem; }
+.stock-alert small { margin-top:.16rem; font-size:.73rem; line-height:1.4; }
+.stock-alert-low { color:#ffc0b6; background:linear-gradient(100deg,#421311,#28100f); border-color:#a83b34; }
+.stock-alert-low > span { color:#2a0808; background:#ff5449; }
+.stock-alert-ok { color:#bdeccc; background:linear-gradient(100deg,#122e1b,#111d16); border-color:#33764c; }
+.stock-alert-ok > span { color:#092613; background:#57ce7d; }
+.inventory-row { transition:background .18s ease; }
+.inventory-row.inventory-low { background:linear-gradient(90deg,rgba(170,39,29,.22),rgba(68,16,14,.05)); }
+.inventory-low strong { color:#ffd0c7; }
+.stock-value { color:#e8ddd7; font-weight:800; }
+.stock-value-low { color:#ff6259; }
+.stock-status { display:inline-flex; align-items:center; min-width:78px; justify-content:center; border:1px solid; border-radius:99px; padding:.26rem .48rem; font-size:.64rem; font-weight:900; white-space:nowrap; }
+.stock-status-ok { color:#97efb1; background:#153d21; border-color:#31824a; }
+.stock-status-low { color:#ffb0a8; background:#4b1716; border-color:#c6453c; box-shadow:0 0 14px rgba(240,65,52,.18); }
+.stock-status-recipe { color:#f6cf8a; background:#352716; border-color:#896b36; }
 .product-row.purchase-row { grid-template-columns: .85fr 1.55fr 1.25fr .85fr .9fr; }
 .product-row.recipe-row { min-width:520px; grid-template-columns:1.25fr 1.25fr .9fr max-content; }
 .product-row.kardex-row { min-width:620px; grid-template-columns:.9fr .85fr 1.55fr .85fr .95fr; }
