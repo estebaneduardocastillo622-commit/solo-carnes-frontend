@@ -127,3 +127,11 @@
 .notification-panel button { width:100%; border:1px solid #e84b43; border-radius:6px; background:#df2722; color:#fff; padding:.48rem .6rem; font-weight:800; cursor:pointer; }
 .menu-card:disabled { cursor:not-allowed; opacity:.55; transform:none; }
 @media(max-width:900px){.sales-actions{justify-items:stretch}.sales-actions .refresh-button{width:100%}}
+
+.user-form { grid-template-columns:repeat(3,1fr); }
+.form-context { grid-column:1 / -1; display:flex; align-items:baseline; justify-content:space-between; gap:1rem; padding:0 0 .9rem; border-bottom:1px solid #3d2d29; }
+.form-context strong { color:#fff1d9; font-size:.92rem; }
+.form-context small { max-width:560px; color:#d1aaa0; line-height:1.45; font-size:.7rem; }
+.product-row.user-row { min-width:600px; grid-template-columns:1.5fr 1.2fr .8fr 1fr; }
+.user-current { color:#d8c5bf; font-size:.76rem; }
+@media(max-width:680px){.user-form{grid-template-columns:1fr}.form-context{display:grid;gap:.35rem}.product-row.user-row{min-width:520px}}

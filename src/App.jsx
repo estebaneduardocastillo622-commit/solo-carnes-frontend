@@ -1,13 +1,13 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { ContactShadows, OrbitControls, Text } from '@react-three/drei';
 import { useEffect, useRef, useState } from 'react';
-import { Bell, ChefHat, ClipboardList, Flame, LayoutDashboard, LogOut, Minus, Package, Plus, ShoppingBasket, Trash2, UtensilsCrossed } from 'lucide-react';
+import { Bell, ChefHat, ClipboardList, Flame, LayoutDashboard, LogOut, Minus, Package, Plus, ShoppingBasket, Trash2, UsersRound, UtensilsCrossed } from 'lucide-react';
 import logo from './assets/solo-carnes-logo.jpg';
-import { createConsumption, createProduct, createPurchase, createRecipe, deleteProduct, createSale, deleteRecipe, getMovements, getProducts, getPurchases, getRecipes, getSales, login } from './api';
+import { createConsumption, createProduct, createPurchase, createRecipe, createUser, deleteProduct, createSale, deleteRecipe, getMovements, getProducts, getPurchases, getRecipes, getSales, getUsers, login } from './api';
 import './App.css';
 import './overrides.css';
 
-const sections=[['Resumen',LayoutDashboard],['Productos',Package],['Compras',ShoppingBasket],['Ventas',UtensilsCrossed],['Recetas',ChefHat],['Kardex',ClipboardList]];
+const sections=[['Resumen',LayoutDashboard],['Productos',Package],['Compras',ShoppingBasket],['Ventas',UtensilsCrossed],['Recetas',ChefHat],['Kardex',ClipboardList],['Usuarios',UsersRound]];
 const TABLES = [
   {id:1,x:-4.4,z:-3.2,seats:4,shape:'round',status:'LIBRE'}, {id:2,x:0,z:-3.2,seats:2,shape:'square',status:'OCUPADA'},
   {id:3,x:4.4,z:-3.2,seats:4,shape:'round',status:'RESERVADA'}, {id:4,x:-4.4,z:0,seats:6,shape:'rect',status:'LIBRE'},
@@ -133,6 +133,46 @@ function RecipeModule({session}) {
     <div className="table-card"><div className="table-title"><h3>Recetas configuradas</h3><span>{loading?'Cargando…':recipeGroups.length+' platos · '+recipes.length+' ingredientes'}</span></div>{loading?<p className="table-empty">Cargando recetas…</p>:recipes.length?<div className="recipe-groups">{recipeGroups.map(group=><article className="recipe-group" key={group.plato?.producto_id||group.items[0].plato_id}><header><div><small>RECETA DEL PLATO</small><h4>{group.plato?.nombre||'Plato sin nombre'}</h4></div><span>{group.items.length} ingrediente{group.items.length===1?'':'s'}</span></header><div className="recipe-group-label"><b>Ingrediente</b><b>Cantidad por plato</b><b>Acción</b></div>{group.items.map(r=><div className="recipe-item" key={r.receta_id}><strong>{r.insumo?.nombre}</strong><span>{r.cantidad} {r.insumo?.unidad}</span>{canManage&&<button type="button" className="outline row-action" onClick={()=>remove(r)} disabled={removingId===r.receta_id}>{removingId===r.receta_id?'Quitando…':'Quitar'}</button>}</div>)}</article>)}</div>:<p className="table-empty">No hay ingredientes configurados todavía.</p>}</div>
   </section>
 }
+function UsersModule({session}) {
+  const empty = { nombre_completo:'', email:'', password:'', rol:'vendedor' };
+  const [form,setForm] = useState(empty), [users,setUsers] = useState([]), [loading,setLoading] = useState(true), [saving,setSaving] = useState(false), [notice,setNotice] = useState(''), [error,setError] = useState('');
+  const canManage = session.usuario.rol === 'administrador';
+  const roleName = role => ({ administrador:'Administrador', vendedor:'Cajero / vendedor', almacen:'Encargado de almacén' }[role] || role);
+  async function load(showConfirmation=false) {
+    if (session.demo) { setUsers([]); setLoading(false); if(showConfirmation) setNotice('La demostración no consulta usuarios reales.'); return; }
+    setLoading(true); setError('');
+    try { const data = await getUsers(session.access_token); setUsers(data.datos || []); if(showConfirmation) setNotice('Personal actualizado correctamente.'); }
+    catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { load(); }, [session.access_token]);
+  async function submit(e) {
+    e.preventDefault(); if (!canManage) return;
+    setSaving(true); setNotice(''); setError('');
+    try {
+      const data = await createUser(session.access_token, form);
+      setForm(empty);
+      setNotice(data.mensaje || 'Usuario creado correctamente.');
+      await load();
+    } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
+  }
+  return <section className="module users-module">
+    <div className="module-head"><div><p className="eyebrow">ACCESOS DEL PERSONAL</p><h2>Usuarios y roles</h2><p>Crea las cuentas del equipo y define qué puede hacer cada persona.</p></div><button type="button" className="outline" onClick={() => load(true)} disabled={loading}>{loading?'Actualizando…':'Actualizar personal'}</button></div>
+    {session.demo && <div className="module-notice">Inicia sesión como administrador para crear cuentas reales.</div>}
+    {!session.demo && canManage && <form className="module-form user-form" onSubmit={submit}>
+      <div className="form-context"><strong>Crear cuenta de personal</strong><small>La cuenta se registra en Supabase. La contraseña solo se usa para crear el acceso y no se guarda en el sistema.</small></div>
+      <label>Nombre completo<input value={form.nombre_completo} maxLength="120" onChange={e=>setForm({...form,nombre_completo:e.target.value})} placeholder="Ej: María López" autoComplete="name" required /></label>
+      <label>Correo electrónico<input type="email" value={form.email} maxLength="254" onChange={e=>setForm({...form,email:e.target.value})} placeholder="Ej: maria@solocarnes.com" autoComplete="email" required /></label>
+      <label>Contraseña inicial<input type="password" value={form.password} minLength="8" maxLength="128" onChange={e=>setForm({...form,password:e.target.value})} placeholder="Mínimo 8 caracteres" autoComplete="new-password" required /></label>
+      <label>Rol del sistema<select value={form.rol} onChange={e=>setForm({...form,rol:e.target.value})}><option value="vendedor">Cajero / vendedor</option><option value="almacen">Encargado de almacén</option><option value="administrador">Administrador</option></select></label>
+      <div className="form-action"><button className="primary" disabled={saving}>{saving?'Creando cuenta…':'Crear usuario'}</button></div>
+    </form>}
+    {!session.demo && !canManage && <div className="module-notice">Solo un administrador puede crear y consultar usuarios.</div>}
+    {notice && <div className="module-success">{notice}</div>}{error && <div className="module-error">{error}</div>}
+    {canManage && <div className="table-card"><div className="table-title"><h3>Personal registrado</h3><span>{loading?'Cargando…':users.length+' usuario'+(users.length===1?'':'s')}</span></div>{loading?<p className="table-empty">Cargando personal…</p>:users.length?<div className="product-table"><div className="product-row user-row product-label"><strong>Nombre</strong><strong>Rol</strong><strong>Estado</strong><strong>Acceso</strong></div>{users.map(user=><div className="product-row user-row" key={user.usuario_id}><strong>{user.nombre_completo}</strong><span className="product-type">{roleName(user.rol)}</span><span><b className={user.estado?'stock-status stock-status-ok':'stock-status stock-status-low'}>{user.estado?'Activo':'Inactivo'}</b></span><span className="user-current">{user.usuario_id===session.usuario.usuario_id?'Tu cuenta':'Cuenta de personal'}</span></div>)}</div>:<p className="table-empty">Todavía no hay usuarios registrados.</p>}</div>}
+  </section>
+}
 function KitchenKardex({session}) {
   const [items,setItems]=useState([]), [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [err,setErr]=useState('');
   async function load(showConfirmation=false) { if(session.demo){setItems([]);setLoading(false);if(showConfirmation)setNotice('La demostración no consulta movimientos reales.');return;}setLoading(true);setErr('');try{const d=await getMovements(session.access_token);setItems(d.datos||[]);if(showConfirmation)setNotice('Kardex actualizado correctamente.');}catch(e){setErr(e.message)}finally{setLoading(false)} }
@@ -150,7 +190,7 @@ function Dashboard({session,onExit}) {
   const goToSales = mesa => { if(mesa) setMesaSeleccionada(String(mesa)); setActive('Ventas'); };
   return <main className="app-shell"><aside><div className="brand"><img src={logo} alt="Solo Carnes"/><span>OPERACIONES</span></div><nav>{sections.map(([n,I])=><button type="button" key={n} className={active===n?'nav-active':''} onClick={()=>setActive(n)}><I size={19}/><em>{n}</em></button>)}</nav><div className="side-footer"><p><span className="status-dot"/> Sistema conectado</p><button type="button" onClick={onExit}><LogOut size={17}/><em>Cerrar sesión</em></button></div></aside><section className="workspace"><header><div><p className="eyebrow">SOLO CARNES · SANTA CRUZ</p><h1>{active}</h1><p className="muted">5.º Anillo, Av. Moscú</p></div><div className="user"><div className="notification-wrap"><button type="button" className="bell" onClick={()=>setShowNotifications(!showNotifications)} aria-label="Mostrar notificaciones" aria-expanded={showNotifications}><Bell size={20}/><i>3</i></button>{showNotifications&&<div className="notification-panel"><strong>Notificaciones</strong><p>3 insumos llegaron al stock mínimo.</p><button type="button" onClick={()=>{setShowNotifications(false);setActive('Productos')}}>Revisar inventario</button></div>}</div><span className="avatar">{session.usuario.nombre_completo.slice(0,1).toUpperCase()}</span><div><strong>{session.usuario.nombre_completo}</strong><small>{session.usuario.rol}</small></div></div></header>
     {session.demo&&<div className="demo-banner">Vista demostrativa: los datos no se guardan. Inicia sesión para operar con la base de datos.</div>}
-    {active==='Resumen'?<><section className="hero"><div><p className="eyebrow fire"><Flame size={15}/> CONTROL DE OPERACIONES</p><h2>Todo listo para el servicio.</h2><p>Monitorea las ventas, los insumos y la cocina desde un solo lugar.</p><button type="button" className="primary" onClick={()=>goToSales()}>Registrar una venta</button></div><TableScene onManage={goToSales}/></section><section className="stat-grid">{stats.map(([t,v,d])=><article key={t}><p>{t}</p><strong>{v}</strong><span>{d}</span></article>)}</section><section className="lower"><article className="activity"><div className="section-title"><h3>Actividad reciente</h3><button type="button" onClick={()=>setActive('Kardex')}>Kardex completo</button></div>{['Compra de lomo fino','Venta: Parrillada para dos','Consumo de carbón en cocina','Stock de chorizo actualizado'].map((x,i)=><div className="activity-row" key={x}><span className={'activity-icon a'+i}>{i===1?<UtensilsCrossed size={17}/>:<Package size={17}/>}</span><p><strong>{x}</strong><small>{i===1?'Venta registrada hace 8 minutos':'Operación registrada hoy'}</small></p><b>{i===1?'+ Bs 120':'Ver detalle'}</b></div>)}</article><article className="alerts"><div className="section-title"><h3>Atención de almacén</h3><Bell size={19}/></div><p><strong>3 insumos</strong> llegaron al stock mínimo.</p><button type="button" className="outline" onClick={()=>setActive('Productos')}>Revisar inventario</button><small>Las alertas pueden notificarse también por Slack.</small></article></section></>:active==='Productos'?<ProductModule session={session}/>:active==='Compras'?<PurchaseModule session={session}/>:active==='Ventas'?<SalesModule session={session} mesaInicial={mesaSeleccionada}/>:active==='Recetas'?<RecipeModule session={session}/>:active==='Kardex'?<KitchenKardex session={session}/>:null}
+    {active==='Resumen'?<><section className="hero"><div><p className="eyebrow fire"><Flame size={15}/> CONTROL DE OPERACIONES</p><h2>Todo listo para el servicio.</h2><p>Monitorea las ventas, los insumos y la cocina desde un solo lugar.</p><button type="button" className="primary" onClick={()=>goToSales()}>Registrar una venta</button></div><TableScene onManage={goToSales}/></section><section className="stat-grid">{stats.map(([t,v,d])=><article key={t}><p>{t}</p><strong>{v}</strong><span>{d}</span></article>)}</section><section className="lower"><article className="activity"><div className="section-title"><h3>Actividad reciente</h3><button type="button" onClick={()=>setActive('Kardex')}>Kardex completo</button></div>{['Compra de lomo fino','Venta: Parrillada para dos','Consumo de carbón en cocina','Stock de chorizo actualizado'].map((x,i)=><div className="activity-row" key={x}><span className={'activity-icon a'+i}>{i===1?<UtensilsCrossed size={17}/>:<Package size={17}/>}</span><p><strong>{x}</strong><small>{i===1?'Venta registrada hace 8 minutos':'Operación registrada hoy'}</small></p><b>{i===1?'+ Bs 120':'Ver detalle'}</b></div>)}</article><article className="alerts"><div className="section-title"><h3>Atención de almacén</h3><Bell size={19}/></div><p><strong>3 insumos</strong> llegaron al stock mínimo.</p><button type="button" className="outline" onClick={()=>setActive('Productos')}>Revisar inventario</button><small>Las alertas pueden notificarse también por Slack.</small></article></section></>:active==='Productos'?<ProductModule session={session}/>:active==='Compras'?<PurchaseModule session={session}/>:active==='Ventas'?<SalesModule session={session} mesaInicial={mesaSeleccionada}/>:active==='Recetas'?<RecipeModule session={session}/>:active==='Kardex'?<KitchenKardex session={session}/>:active==='Usuarios'?<UsersModule session={session}/>:null}
   </section></main>
 }
 export default function App(){const[session,setSession]=useState(()=>{try{return JSON.parse(sessionStorage.getItem('solo-carnes-session'))||null}catch{return null}});function open(s){if(!s.demo)sessionStorage.setItem('solo-carnes-session',JSON.stringify(s));setSession(s)}function exit(){sessionStorage.removeItem('solo-carnes-session');setSession(null)}return session?<Dashboard session={session} onExit={exit}/>:<Login onSession={open}/>}

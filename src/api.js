@@ -25,6 +25,8 @@ export const getSales = token => request('/api/ventas?limite=30', token);
 export const createSale = (token, sale) => request('/api/ventas', token, { method: 'POST', body: JSON.stringify(sale) });
 export const createConsumption = (token, consumption) => request('/api/consumos', token, { method: 'POST', body: JSON.stringify(consumption) });
 export const getMovements = token => request('/api/kardex?limite=50', token);
+export const getUsers = token => request('/api/usuarios?limite=100', token);
+export const createUser = (token, user) => request('/api/usuarios', token, { method: 'POST', body: JSON.stringify(user) });
 
 export const getRecipes = (token, platoId) => request('/api/recetas?' + (platoId ? 'plato_id=' + platoId + '&' : '') + 'carga=' + Date.now(), token);
 export const createRecipe = (token, recipe) => request('/api/recetas', token, { method: 'POST', body: JSON.stringify(recipe) });
